@@ -116,7 +116,7 @@ TOLUA_API void tolua_error (lua_State* L, const char* msg, tolua_Error* err)
 }
 
 /* the equivalent of lua_is* for usertable */
-static  int lua_isusertable (lua_State* L, int lo, const const char* type)
+static  int lua_isusertable (lua_State* L, int lo, const char* type)
 {
 	int r = 0;
 	if (lo < 0) lo = lua_gettop(L)+lo+1;
@@ -324,6 +324,7 @@ TOLUA_API int tolua_isusertype (lua_State* L, int lo, const char* type, int def,
 TOLUA_API int tolua_isvaluearray
  (lua_State* L, int lo, int dim, int def, tolua_Error* err)
 {
+	( void ) dim;			// disable [-Werror=unused-variable]
 	if (!tolua_istable(L,lo,def,err))
 		return 0;
 	else

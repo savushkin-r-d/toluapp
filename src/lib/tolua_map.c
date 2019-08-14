@@ -25,7 +25,7 @@
 /* Create metatable
 	* Create and register new metatable
 */
-static int tolua_newmetatable (lua_State* L, char* name)
+static int tolua_newmetatable (lua_State* L, const char* name)
 {
 	int r = luaL_newmetatable(L,name);
 
@@ -392,6 +392,7 @@ TOLUA_API int tolua_register_gc (lua_State* L, int lo)
 TOLUA_API void tolua_usertype (lua_State* L, const char* type)
 {
  char ctype[128] = "const ";
+#pragma warning(suppress: 4996)    //strncat to strncat_s
  strncat(ctype,type,120);
 
 	/* create both metatables */
@@ -522,7 +523,9 @@ TOLUA_API void tolua_cclass (lua_State* L, const char* lname, const char* name, 
 {
 	char cname[128] = "const ";
 	char cbase[128] = "const ";
+#pragma warning(suppress: 4996)    //strncat to strncat_s
 	strncat(cname,name,120);
+#pragma warning(suppress: 4996)    //strncat to strncat_s
 	strncat(cbase,base,120);
 
 	mapinheritance(L,name,base);
