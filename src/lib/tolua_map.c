@@ -257,7 +257,7 @@ static int tolua_bnd_setpeer(lua_State* L) {
 		lua_pushstring(L, "Invalid argument #1 to setpeer: userdata expected.");
 		lua_error(L);
 	};
-	
+
 	if (lua_isnil(L, -1)) {
 
 		lua_pop(L, 1);
@@ -392,7 +392,6 @@ TOLUA_API int tolua_register_gc (lua_State* L, int lo)
 TOLUA_API void tolua_usertype (lua_State* L, const char* type)
 {
  char ctype[128] = "const ";
-#pragma warning(suppress: 4996)    //strncat to strncat_s
  strncat(ctype,type,120);
 
 	/* create both metatables */
@@ -523,9 +522,7 @@ TOLUA_API void tolua_cclass (lua_State* L, const char* lname, const char* name, 
 {
 	char cname[128] = "const ";
 	char cbase[128] = "const ";
-#pragma warning(suppress: 4996)    //strncat to strncat_s
 	strncat(cname,name,120);
-#pragma warning(suppress: 4996)    //strncat to strncat_s
 	strncat(cbase,base,120);
 
 	mapinheritance(L,name,base);
@@ -535,7 +532,7 @@ TOLUA_API void tolua_cclass (lua_State* L, const char* lname, const char* name, 
 	mapsuper(L,name,base);
 
 	lua_pushstring(L,lname);
-	
+
 	push_collector(L, name, col);
 	/*
 	luaL_getmetatable(L,name);
@@ -544,7 +541,7 @@ TOLUA_API void tolua_cclass (lua_State* L, const char* lname, const char* name, 
 
 	lua_rawset(L,-3);
 	*/
-	
+
 	luaL_getmetatable(L,name);
 	lua_rawset(L,-3);              /* assign class metatable to module */
 
@@ -558,7 +555,7 @@ TOLUA_API void tolua_cclass (lua_State* L, const char* lname, const char* name, 
 	lua_rawset(L,-3);
 	lua_pop(L,1);
 	*/
-	
+
 
 }
 
@@ -699,7 +696,8 @@ TOLUA_API void tolua_array (lua_State* L, const char* name, lua_CFunction get, l
 TOLUA_API void tolua_dobuffer(lua_State* L, char* B, unsigned int size, const char* name) {
 
  #ifdef LUA_VERSION_NUM /* lua 5.1 */
- luaL_loadbuffer(L, B, size, name) || lua_pcall(L, 0, 0, 0);
+ int res = luaL_loadbuffer(L, B, size, name) || lua_pcall(L, 0, 0, 0);
+ (void) res; //[-Werror=unused-value]
  #else
  lua_dobuffer(L, B, size, name);
  #endif
