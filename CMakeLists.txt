@@ -19,8 +19,10 @@ endif ( )
 
 add_library ( toluapp_lib ${SRC_LIBTOLUAPP} ${DEF_FILE} )
 target_link_libraries ( toluapp_lib ${LUA_LIBRARIES} )
-set_target_properties ( toluapp_lib PROPERTIES OUTPUT_NAME toluapp CLEAN_DIRECT_OUTPUT 
+set_target_properties ( toluapp_lib PROPERTIES OUTPUT_NAME toluapp CLEAN_DIRECT_OUTPUT
   1 )
+
+add_library ( toluapp_lib_static STATIC ${SRC_LIBTOLUAPP} ${DEF_FILE} )
 
 # Build app
 include_directories ( src/bin )
