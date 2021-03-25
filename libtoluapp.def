@@ -30,6 +30,7 @@ tolua_isusertable
 tolua_isusertype
 tolua_isusertypearray
 tolua_isvalue
+tolua_isvaluenil
 tolua_isvaluearray
 tolua_module
 tolua_moduleevents
