@@ -150,6 +150,30 @@ int main (int argc, char* argv[])
  {
   int tolua_tolua_open (lua_State* L);
   tolua_tolua_open(L);
+
+  /*
+  ** Lua 5.2+ does not provide global 'arg' for varargs.
+  ** Old embedded compat.lua relies on arg[1] in read/write.
+  ** Override these helpers with a Lua 5.1+ compatible version.
+  */
+  luaL_dostring(L,
+    "local _unpack = table.unpack or unpack\n"
+    "function read(...)\n"
+    "  local f = _INPUT\n"
+    "  local a = {...}\n"
+    "  if rawtype(a[1]) == 'userdata' then\n"
+    "    f = table.remove(a, 1)\n"
+    "  end\n"
+    "  return f:read(_unpack(a))\n"
+    "end\n"
+    "function write(...)\n"
+    "  local f = _OUTPUT\n"
+    "  local a = {...}\n"
+    "  if rawtype(a[1]) == 'userdata' then\n"
+    "    f = table.remove(a, 1)\n"
+    "  end\n"
+    "  return f:write(_unpack(a))\n"
+    "end");
  }
 #else
  {

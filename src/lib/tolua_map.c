@@ -698,6 +698,40 @@ TOLUA_API void tolua_dobuffer(lua_State* L, char* B, unsigned int size, const ch
  #ifdef LUA_VERSION_NUM /* lua 5.1 */
  int res = luaL_loadbuffer(L, B, size, name) || lua_pcall(L, 0, 0, 0);
  (void) res; //[-Werror=unused-value]
+
+ #if LUA_VERSION_NUM >= 502
+ /*
+ ** Lua 5.2+ compatibility.
+ ** Old embedded compat.lua uses global 'arg' in read/write.
+ ** Re-define helpers with varargs table after each loaded chunk.
+ */
+ (void)luaL_dostring(L,
+  "table.getn = table.getn or function(t) return #t end\n"
+  "table.foreach = table.foreach or function(t, f) for k,v in pairs(t) do f(k,v) end end\n"
+  "table.foreachi = table.foreachi or function(t, f) for i,v in ipairs(t) do f(i,v) end end\n"
+  "unpack = unpack or table.unpack\n"
+  "loadstring = loadstring or load\n"
+  "getn = getn or table.getn\n"
+  "foreach = foreach or table.foreach\n"
+  "foreachi = foreachi or table.foreachi\n"
+  "local _unpack = table.unpack or unpack\n"
+  "function read(...)\n"
+  "  local f = _INPUT\n"
+  "  local a = {...}\n"
+  "  if rawtype(a[1]) == 'userdata' then\n"
+  "    f = table.remove(a, 1)\n"
+  "  end\n"
+  "  return f:read(_unpack(a))\n"
+  "end\n"
+  "function write(...)\n"
+  "  local f = _OUTPUT\n"
+  "  local a = {...}\n"
+  "  if rawtype(a[1]) == 'userdata' then\n"
+  "    f = table.remove(a, 1)\n"
+  "  end\n"
+  "  return f:write(_unpack(a))\n"
+  "end");
+ #endif
  #else
  lua_dobuffer(L, B, size, name);
  #endif
