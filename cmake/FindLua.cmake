@@ -40,7 +40,7 @@ SET(_POSSIBLE_LUA_LIBRARY lua)
 IF(Lua_FIND_VERSION_MAJOR AND Lua_FIND_VERSION_MINOR)
   SET(_POSSIBLE_SUFFIXES "${Lua_FIND_VERSION_MAJOR}${Lua_FIND_VERSION_MINOR}" "${Lua_FIND_VERSION_MAJOR}.${Lua_FIND_VERSION_MINOR}" "-${Lua_FIND_VERSION_MAJOR}.${Lua_FIND_VERSION_MINOR}")
 ELSE(Lua_FIND_VERSION_MAJOR AND Lua_FIND_VERSION_MINOR)
-  SET(_POSSIBLE_SUFFIXES "52" "5.2" "-5.2" "51" "5.1" "-5.1")
+  SET(_POSSIBLE_SUFFIXES "55" "5.5" "-5.5" "54" "5.4" "-5.4" "53" "5.3" "-5.3" "52" "5.2" "-5.2" "51" "5.1" "-5.1")
 ENDIF(Lua_FIND_VERSION_MAJOR AND Lua_FIND_VERSION_MINOR)
 
 # Set up possible search names and locations
@@ -105,6 +105,18 @@ IF(LUA_INCLUDE_DIR AND EXISTS "${LUA_INCLUDE_DIR}/lua.h")
 
   STRING(REGEX REPLACE "^#define[ \t]+LUA_RELEASE[ \t]+\"Lua ([^\"]+)\".*" "\\1" LUA_VERSION_STRING "${lua_version_str}")
   UNSET(lua_version_str)
+  # Lua 5.5 builds LUA_RELEASE through macros instead of a string literal.
+  IF(NOT LUA_VERSION_STRING)
+    FOREACH(component MAJOR MINOR RELEASE)
+      FILE(STRINGS "${LUA_INCLUDE_DIR}/lua.h" component_line
+        REGEX "^#define[ \t]+LUA_VERSION_${component}_N[ \t]+[0-9]+")
+      STRING(REGEX REPLACE ".*[ \t]+([0-9]+)$" "\\1"
+        lua_${component} "${component_line}")
+    ENDFOREACH()
+    IF(lua_MAJOR AND lua_MINOR AND DEFINED lua_RELEASE AND NOT "${lua_RELEASE}" STREQUAL "")
+      SET(LUA_VERSION_STRING "${lua_MAJOR}.${lua_MINOR}.${lua_RELEASE}")
+    ENDIF()
+  ENDIF()
 ENDIF()
 
 INCLUDE(FindPackageHandleStandardArgs)

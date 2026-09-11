@@ -13,6 +13,7 @@
 */
 
 #include "tolua++.h"
+#include "tolua_compat.h"
 #include "tolua_event.h"
 #include "lauxlib.h"
 
@@ -263,7 +264,7 @@ static int tolua_bnd_setpeer(lua_State* L) {
 		lua_pop(L, 1);
 		lua_pushvalue(L, TOLUA_NOPEER);
 	};
-	lua_setfenv(L, -2);
+	tolua_setpeer_table(L, -2);
 
 	return 0;
 };
@@ -271,7 +272,7 @@ static int tolua_bnd_setpeer(lua_State* L) {
 static int tolua_bnd_getpeer(lua_State* L) {
 
 	/* stack: userdata */
-	lua_getfenv(L, -1);
+	tolua_getpeer_table(L, -1);
 	if (lua_rawequal(L, -1, TOLUA_NOPEER)) {
 		lua_pop(L, 1);
 		lua_pushnil(L);
@@ -411,7 +412,7 @@ TOLUA_API void tolua_beginmodule (lua_State* L, const char* name)
 		lua_rawget(L,-2);
 	}
 	else
-	 lua_pushvalue(L,LUA_GLOBALSINDEX);
+	 lua_pushglobaltable(L);
 }
 
 /* End module
@@ -445,7 +446,7 @@ TOLUA_API void tolua_module (lua_State* L, const char* name, int hasvar)
 	else
 	{
 		/* global table */
-		lua_pushvalue(L,LUA_GLOBALSINDEX);
+		lua_pushglobaltable(L);
 	}
 	if (hasvar)
 	{
@@ -473,7 +474,7 @@ TOLUA_API void tolua_module (lua_State* L, const char* name, int hasvar)
 	else
 	{
 		/* global table */
-		lua_pushvalue(L,LUA_GLOBALSINDEX);
+		lua_pushglobaltable(L);
 	}
 	if (hasvar)
 	{
@@ -697,7 +698,7 @@ TOLUA_API void tolua_dobuffer(lua_State* L, char* B, unsigned int size, const ch
 
  #ifdef LUA_VERSION_NUM /* lua 5.1 */
  int res = luaL_loadbuffer(L, B, size, name) || lua_pcall(L, 0, 0, 0);
- (void) res; //[-Werror=unused-value]
+ if (res) lua_error(L);
  #else
  lua_dobuffer(L, B, size, name);
  #endif

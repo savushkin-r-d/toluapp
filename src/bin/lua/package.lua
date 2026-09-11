@@ -334,10 +334,15 @@ function prep(file)
     end
   end
   table.insert(chunk, '\nreturn table.concat(__ret)\n')
-  local f,e = loadstring(table.concat(chunk))
+  local f,e
+  if setfenv then
+    f,e = loadstring(table.concat(chunk))
+    if f then setfenv(f, _extra_parameters) end
+  else
+    f,e = load(table.concat(chunk), "tolua template", "t", _extra_parameters)
+  end
   if e then
   	error("#"..e)
   end
-  setfenv(f, _extra_parameters)
   return f()
 end

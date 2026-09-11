@@ -1,3 +1,22 @@
+-- Compatibility used only inside the generator's Lua state.
+loadstring = loadstring or load
+unpack = unpack or table.unpack
+string.gfind = string.gfind or string.gmatch
+table.getn = table.getn or function(t) return #t end
+table.foreach = table.foreach or function(t, f)
+  for k, v in pairs(t) do
+    local r = f(k, v)
+    if r ~= nil then return r end
+  end
+end
+table.foreachi = table.foreachi or function(t, f)
+  for i = 1, #t do
+    local r = f(i, t[i])
+    if r ~= nil then return r end
+  end
+end
+math.mod = math.mod or math.fmod
+
 -------------------------------------------------------------------
 -- Real globals
 -- _ALERT
@@ -176,6 +195,7 @@ function appendto (name)
 end
 
 function read (...)
+  local arg = {...}
   local f = _INPUT
   if rawtype(arg[1]) == 'userdata' then
     f = tab.remove(arg, 1)
@@ -184,6 +204,7 @@ function read (...)
 end
 
 function write (...)
+  local arg = {...}
   local f = _OUTPUT
   if rawtype(arg[1]) == 'userdata' then
     f = tab.remove(arg, 1)

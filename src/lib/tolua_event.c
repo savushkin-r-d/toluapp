@@ -15,6 +15,7 @@
 #include <stdio.h>
 
 #include "tolua++.h"
+#include "tolua_compat.h"
 
 /* Store at ubox
 	* It stores, creating the corresponding table if needed,
@@ -23,12 +24,12 @@
 static void storeatubox (lua_State* L, int lo)
 {
 	#ifdef LUA_VERSION_NUM
-		lua_getfenv(L, lo);
+		tolua_getpeer_table(L, lo);
 		if (lua_rawequal(L, -1, TOLUA_NOPEER)) {
 			lua_pop(L, 1);
 			lua_newtable(L);
 			lua_pushvalue(L, -1);
-			lua_setfenv(L, lo);	/* stack: k,v,table  */
+			tolua_setpeer_table(L, lo);	/* stack: k,v,table  */
 		};
 		lua_insert(L, -3);
 		lua_settable(L, -3); /* on lua 5.1, we trade the "tolua_peers" lookup for a settable call */
@@ -141,7 +142,7 @@ static int class_index_event (lua_State* L)
 	{
 		/* Access alternative table */
 		#ifdef LUA_VERSION_NUM /* new macro on version 5.1 */
-		lua_getfenv(L,1);
+		tolua_getpeer_table(L,1);
 		if (!lua_rawequal(L, -1, TOLUA_NOPEER)) {
 			lua_pushvalue(L, 2); /* key */
 			lua_gettable(L, -2); /* on lua 5.1, we trade the "tolua_peers" lookup for a gettable call */
@@ -420,8 +421,11 @@ static int class_gc_event (lua_State* L)
 */
 TOLUA_API int class_gc_event (lua_State* L)
 {
-	void* u = *((void**)lua_touserdata(L,1));
+	void* u;
 	int top;
+	/* Lua 5.2+ also finalizes class tables that share this metatable. */
+	if (lua_type(L, 1) != LUA_TUSERDATA) return 0;
+	u = *((void**)lua_touserdata(L,1));
 	/*fprintf(stderr, "collecting: looking at %p\n", u);*/
 	/*
 	lua_pushstring(L,"tolua_gc");

@@ -105,9 +105,10 @@ end
  else
  if not f then f = "(f is nil)" end
   print("\n** tolua internal error: "..f..s..".\n\n")
-  return
+  error(s, 0)
  end
  _OUTPUT = out
+ error(s, 0)
 end
 
 function warning (msg)
@@ -251,6 +252,7 @@ end
 
 -- concatenate all parameters, following output rules
 function concatparam (line, ...)
+ local arg = {n=select("#", ...), ...}
  local i=1
  while i<=arg.n do
   if _cont and not strfind(_cont,'[%(,"]') and
@@ -271,6 +273,7 @@ end
 
 -- output line
 function output (...)
+ local arg = {n=select("#", ...), ...}
  local i=1
  while i<=arg.n do
   if _cont and not strfind(_cont,'[%(,"]') and

@@ -13,6 +13,7 @@
 */
 
 #include "tolua++.h"
+#include "tolua_compat.h"
 #include "lauxlib.h"
 
 #include <stdlib.h>
@@ -79,7 +80,7 @@ TOLUA_API void tolua_pushusertype (lua_State* L, void* value, const char* type)
 
    #ifdef LUA_VERSION_NUM
    lua_pushvalue(L, TOLUA_NOPEER);
-   lua_setfenv(L, -2);
+   tolua_setpeer_table(L, -2);
    #endif
   }
   else

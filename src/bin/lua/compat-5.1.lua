@@ -18,7 +18,6 @@ local function pp_dofile(path)
 			local ret = file:read("*a")
 			file:close()
 
-			ret = string.gsub(ret, "%.%.%.%s*%)", "...) local arg = {n=select('#', ...), ...};")
 
 			loaded = true
 			return ret

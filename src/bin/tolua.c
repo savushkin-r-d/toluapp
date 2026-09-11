@@ -67,7 +67,11 @@ static void setfield (lua_State* L, int table, char* f, char* v)
 static void add_extra (lua_State* L, char* value) {
 	int len;
 	lua_getglobal(L, "_extra_parameters");
+	#if defined(LUA_VERSION_NUM) && LUA_VERSION_NUM >= 502
+	len = (int)lua_rawlen(L, -1);
+	#else
 	len = luaL_getn(L, -1);
+	#endif
 	lua_pushstring(L, value);
 	lua_rawseti(L, -2, len+1);
 	lua_pop(L, 1);
@@ -78,6 +82,13 @@ static void error (char* o)
  fprintf(stderr,"tolua: unknown option '%s'\n",o);
  help();
  exit(1);
+}
+
+static int run_generator(lua_State* L)
+{
+ int tolua_tolua_open(lua_State* L);
+ tolua_tolua_open(L);
+ return 0;
 }
 
 int main (int argc, char* argv[])
@@ -149,7 +160,12 @@ int main (int argc, char* argv[])
 #ifndef TOLUA_SCRIPT_RUN
  {
   int tolua_tolua_open (lua_State* L);
-  tolua_tolua_open(L);
+  lua_pushcfunction(L, run_generator);
+  if (lua_pcall(L, 0, 0, 0) != 0) {
+   fprintf(stderr, "%s\n", lua_tostring(L, -1));
+   lua_close(L);
+   return 1;
+  }
  }
 #else
  {
@@ -165,5 +181,6 @@ int main (int argc, char* argv[])
   lua_dofile(L,path);
  }
 #endif
+ lua_close(L);
  return 0;
 }
